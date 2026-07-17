@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CR 보카 퀴즈 마스터</title>
+    <style>
+        :root {
+            --primary-green: #2ECC71;
+            --primary-blue: #3498DB;
+            --dark-blue: #2C3E50;
+            --pure-black: #1A1A1A;
+            --pure-white: #FFFFFF;
+            --bg-light: #F4F6F8;
+            --border-color: #E2E8F0;
+            --text-dark: #2C3E50;
+            --text-muted: #7F8C8D;
+        }
+
+        /* 모바일 리셋 및 기본 스타일 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* 메인 컨테이너 */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--pure-white);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* 헤더 디자인 */
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--pure-black);
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        h1 span {
+            color: var(--primary-blue);
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* 단원 조작 패널 */
+        .controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            background-color: var(--pure-white);
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232C3E50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .btn {
+            font-size: 15px;
+            font-weight: 700;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-shuffle {
+            background-color: var(--pure-black);
+            color: var(--pure-white);
+        }
+
+        .btn-shuffle:active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        /* 퀴즈 카드 영역 */
+        .quiz-card {
+            background-color: var(--bg-light);
+            border-radius: 20px;
+            padding: 28px 20px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            position: absolute;
+            top: 14px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .unit-badge {
+            color: var(--primary-blue);
+        }
+
+        .progress-count {
+            color: var(--text-muted);
+        }
+
+        .definition-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--pure-black);
+            line-height: 1.6;
+            margin-top: 10px;
+            word-break: break-word;
+        }
+
+        /* 정답 확인 영역 */
+        .answer-container {
+            min-height: 110px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-show {
+            background-color: var(--primary-green);
+            color: var(--pure-white);
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2);
+        }
+
+        .btn-show:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 5px rgba(46, 204, 113, 0.2);
+        }
+
+        .answer-word {
+            font-size: 28px;
+            font-weight: 850;
+            color: var(--primary-blue);
+            text-transform: lowercase;
+            letter-spacing: -0.5px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 8px 24px;
+            background-color: rgba(52, 152, 219, 0.08);
+            border-radius: 12px;
+            border: 2px dashed rgba(52, 152, 219, 0.3);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 이동 네비게이션 버튼 */
+        .navigation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .btn-nav {
+            background-color: var(--pure-white);
+            color: var(--pure-black);
+            border: 2px solid var(--border-color);
+            padding: 14px;
+        }
+
+        .btn-nav:active {
+            background-color: var(--bg-light);
+            transform: scale(0.97);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .btn-next {
+            border-color: var(--pure-black);
+            background-color: var(--pure-black);
+            color: var(--pure-white);
+        }
+
+        .btn-next:active {
+            background-color: #333333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1>CR Voca <span>퀴즈 마스터</span></h1>
+        <div class="subtitle">영어 정의(Definition)를 보고 단어를 맞춰보세요!</div>
+    </header>
+
+    <div class="controls">
+        <select id="unit-selector" onchange="loadSelectedUnit()">
+            <option value="all">전체 단원 (5, 6, 7)</option>
+            <option value="5">5 단원</option>
+            <option value="6">6 단원</option>
+            <option value="7">7 단원</option>
+        </select>
+        <button class="btn btn-shuffle" onclick="shuffleCurrentList()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+            섞기 (Shuffle)
+        </button>
+    </div>
+
+    <div class="quiz-card">
+        <div class="card-header">
+            <span class="unit-badge" id="unit-badge">UNIT 5</span>
+            <span class="progress-count" id="progress-indicator">1 / 15</span>
+        </div>
+        <div class="definition-text" id="quiz-definition">
+            불러오는 중...
+        </div>
+    </div>
+
+    <div class="answer-container">
+        <button class="btn btn-show" id="btn-reveal" onclick="revealAnswer()">정답 보기</button>
+        <div class="answer-word" id="quiz-answer" style="display: none;">word</div>
+    </div>
+
+    <div class="navigation">
+        <button class="btn btn-nav" id="btn-prev" onclick="handlePrev()">이전</button>
+        <button class="btn btn-nav btn-next" id="btn-next" onclick="handleNext()">다음</button>
+    </div>
+</div>
+
+<script>
+    // 단원 데이터 세트
+    const vocabularyDatabase = {
+        5: [
+            { word: "plow", def: "to dig the ground with a farm tool to get it ready for planting" },
+            { word: "field", def: "a wide area of open land" },
+            { word: "cherish", def: "to value with great love and care" },
+            { word: "precious", def: "of great worth or value" },
+            { word: "compliment", def: "an expression of praise or admiration" },
+            { word: "wagon", def: "a vehicle with four wheels that is used to carry large or heavy loads" },
+            { word: "grain", def: "the small hard seeds of plants such as wheat or rice" },
+            { word: "diligently", def: "with persistent and careful effort to achieve a goal" },
+            { word: "wheel", def: "a circular object connected at the centre to a bar, used for making vehicles or parts of machines move" },
+            { word: "on purpose", def: "in a way that is planned or intended" },
+            { word: "merchant", def: "a person who owns a shop or other business that is involved with buying and selling" },
+            { word: "annoy", def: "to cause someone to be angry or upset" },
+            { word: "load", def: "an amount of something that is carried" },
+            { word: "comfort", def: "to make someone feel less pain or worry" },
+            { word: "exhausted", def: "extremely tired, having used up all or nearly all of one's energy" }
+        ],
+        6: [
+            { word: "overwhelm", def: "to cause someone to feel a sudden strong emotion" },
+            { word: "treat", def: "to act toward someone or something in a particular way" },
+            { word: "pity", def: "sympathy or sorrow caused by another's pain, misfortune, or suffering" },
+            { word: "adore", def: "to love and respect someone deeply" },
+            { word: "bull", def: "an adult male of cattle and some other animals" },
+            { word: "ancestor", def: "a person related to you who lived a long time ago" },
+            { word: "sacrifice", def: "the gift of something to a god as an act of worship" },
+            { word: "calf", def: "a young cow" },
+            { word: "value", def: "the importance or worth of something for someone" },
+            { word: "spare", def: "to keep from hurting or killing" },
+            { word: "slaughter-house", def: "a place where animals are killed for food" },
+            { word: "reason", def: "a cause or an explanation for an event" },
+            { word: "stream", def: "(of liquid or gas) to move or pour out in a continuous flow" },
+            { word: "burst", def: "to suddenly begin doing or producing something" },
+            { word: "offer", def: "to present a prayer or sacrifice to a god" }
+        ],
+        7: [
+            { word: "wag", def: "(especially an animal's tail) to cause to move repeatedly up and down or from side to side" },
+            { word: "arrive", def: "to reach a certain place" },
+            { word: "bully", def: "to frighten, hurt, or threaten a smaller or weaker person" },
+            { word: "selfish", def: "concerned only about yourself and not about others" },
+            { word: "gentle", def: "kind; generous; mild" },
+            { word: "bridge", def: "a structure that goes over something such as a river or road so that people can travel from one side to the other" },
+            { word: "welcome", def: "to express pleasure and kind feelings when someone arrives or joins you" },
+            { word: "warmth", def: "kindness and friendliness" },
+            { word: "recognize", def: "to identify or realize something correctly" },
+            { word: "reflection", def: "an image seen in a mirror or a shiny surface" },
+            { word: "sharp", def: "having a thin edge or a fine point, especially for cutting or piercing; not blunt" },
+            { word: "frighten", def: "to make someone afraid" },
+            { word: "disappear", def: "to be no longer seen" },
+            { word: "shelter", def: "a place giving protection from bad weather or danger" },
+            { word: "fierce", def: "wild and dangerous" }
+        ]
+    };
+
+    let activeList = [];
+    let currentIndex = 0;
+
+    function loadSelectedUnit() {
+        const selectorValue = document.getElementById("unit-selector").value;
+        activeList = [];
+
+        if (selectorValue === "all") {
+            [5, 6, 7].forEach(unit => {
+                vocabularyDatabase[unit].forEach(item => {
+                    activeList.push({ ...item, unit: unit });
+                });
+            });
+        } else {
+            const unit = parseInt(selectorValue);
+            vocabularyDatabase[unit].forEach(item => {
+                activeList.push({ ...item, unit: unit });
+            });
+        }
+        
+        currentIndex = 0;
+        renderQuiz();
+    }
+
+    function shuffleCurrentList() {
+        if (activeList.length <= 1) return;
+        for (let i = activeList.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [activeList[i], activeList[j]] = [activeList[j], activeList[i]];
+        }
+        currentIndex = 0;
+        renderQuiz();
+    }
+
+    function renderQuiz() {
+        if (activeList.length === 0) return;
+
+        const currentItem = activeList[currentIndex];
+        
+        // 라벨 업데이트
+        document.getElementById("unit-badge").innerText = `${currentItem.unit} 단원`;
+        document.getElementById("progress-indicator").innerText = `${currentIndex + 1} / ${activeList.length}`;
+        document.getElementById("quiz-definition").innerText = currentItem.def;
+        document.getElementById("quiz-answer").innerText = currentItem.word;
+
+        // 정답 영역 리셋
+        document.getElementById("quiz-answer").style.display = "none";
+        document.getElementById("btn-reveal").style.display = "block";
+
+        // 이전/다음 버튼 활성/비활성 처리
+        document.getElementById("btn-prev").disabled = currentIndex === 0;
+        document.getElementById("btn-next").disabled = currentIndex === activeList.length - 1;
+    }
+
+    function revealAnswer() {
+        document.getElementById("btn-reveal").style.display = "none";
+        document.getElementById("quiz-answer").style.display = "block";
+    }
+
+    function handleNext() {
+        if (currentIndex < activeList.length - 1) {
+            currentIndex++;
+            renderQuiz();
+        }
+    }
+
+    function handlePrev() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderQuiz();
+        }
+    }
+
+    // 첫 실행
+    window.onload = function() {
+        loadSelectedUnit();
+    }
+</script>
+
+</body>
+</html>
