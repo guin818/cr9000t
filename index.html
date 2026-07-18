@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Voca Practice Test</title>
+    <style>
+        :root {
+            --primary-green: #2ECC71;
+            --primary-blue: #3498DB;
+            --dark-blue: #2C3E50;
+            --pure-black: #1A1A1A;
+            --pure-white: #FFFFFF;
+            --bg-light: #F4F6F8;
+            --border-color: #E2E8F0;
+            --text-dark: #2C3E50;
+            --text-muted: #7F8C8D;
+            --error-red: #E74C3C;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--pure-white);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--pure-black);
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        h1 span {
+            color: var(--primary-green);
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-shuffle {
+            background-color: var(--pure-black);
+            color: var(--pure-white);
+        }
+
+        .btn-shuffle:active {
+            transform: scale(0.96);
+        }
+
+        .quiz-card {
+            background-color: var(--bg-light);
+            border-radius: 20px;
+            padding: 24px 20px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .test-badge {
+            color: var(--primary-green);
+        }
+
+        .progress-count {
+            color: var(--text-muted);
+        }
+
+        .question-text {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--pure-black);
+            line-height: 1.5;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background-color: var(--pure-white);
+            color: var(--text-dark);
+            border: 2px solid var(--border-color);
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-green);
+        }
+
+        .option-btn.correct {
+            background-color: var(--primary-green) !important;
+            border-color: var(--primary-green) !important;
+            color: var(--pure-white) !important;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--error-red) !important;
+            border-color: var(--error-red) !important;
+            color: var(--pure-white) !important;
+        }
+
+        .navigation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            border-top: 2px solid var(--bg-light);
+            padding-top: 16px;
+        }
+
+        .btn-nav {
+            background-color: var(--pure-white);
+            color: var(--pure-black);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.4;
+        }
+
+        .btn-next {
+            border-color: var(--pure-black);
+            background-color: var(--pure-black);
+            color: var(--pure-white);
+        }
+
+        /* 결과 화면 스타일 */
+        .report-card {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .score-box {
+            text-align: center;
+            background-color: var(--bg-light);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .score-text {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary-green);
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .report-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 10px;
+            color: var(--pure-white);
+        }
+
+        .report-item.pass { background-color: var(--primary-green); }
+        .report-item.fail { background-color: var(--error-red); }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="quiz-screen">
+    <header>
+        <h1>Voca Practice <span>Test</span></h1>
+        <div class="subtitle">자동 넘김 & 오답 체크 모드</div>
+    </header>
+
+    <div class="controls">
+        <button class="btn btn-shuffle" onclick="shuffleCurrentList()">
+            🔄 문제 무작위 섞기
+        </button>
+        <button class="btn btn-shuffle" style="background-color: var(--dark-blue);" onclick="initApp()">
+            정렬 초기화
+        </button>
+    </div>
+
+    <div class="quiz-card">
+        <div class="card-header">
+            <span class="test-badge" id="test-badge">TERM TEST</span>
+            <span class="progress-count" id="progress-indicator">1 / 45</span>
+        </div>
+        <div class="question-text" id="quiz-question">
+            Loading question...
+        </div>
+    </div>
+
+    <div class="options-container" id="options-box"></div>
+
+    <div class="navigation">
+        <button class="btn btn-nav" id="btn-prev" onclick="handlePrev()">이전 문제</button>
+        <button class="btn btn-nav btn-next" id="btn-next" onclick="handleNext()">다음 문제</button>
+    </div>
+</div>
+
+<!-- 결과 리포트 화면 -->
+<div class="app-container" id="report-screen" style="display: none;">
+    <header>
+        <h1>Test <span>Result</span></h1>
+        <div class="subtitle">건우 님의 최종 테스트 결과 리포트</div>
+    </header>
+
+    <div class="score-box">
+        <div class="score-text" id="final-score">0 / 45</div>
+        <p style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">맞춘 문항 수</p>
+    </div>
+
+    <h3 style="font-size: 15px; font-weight: 700;">문항별 정오답 현황</h3>
+    <div class="report-grid" id="report-grid-box"></div>
+
+    <button class="btn btn-shuffle" style="background-color: var(--primary-blue);" onclick="restartQuiz()">
+        🔄 다시 도전하기
+    </button>
+</div>
+
+<script>
+    const quizDatabase = [
+        { id: 1, q: "to make someone afraid", opt: { a: "friction", b: "fridge", c: "frighten", d: "friend" }, ans: "c" },
+        { id: 2, q: "sympathy or sorrow caused by another's pain, bad luck, or suffering", opt: { a: "pretty", b: "pray", c: "pity", d: "fit" }, ans: "c" },
+        { id: 3, q: "a place giving protection from bad weather or danger", opt: { a: "shell", b: "sheep", c: "shelter", d: "shade" }, ans: "c" },
+        { id: 4, q: "to act toward someone or something in a particular way", opt: { a: "threat", b: "frighten", c: "trait", d: "treat" }, ans: "d" },
+        { id: 5, q: "to reach a certain place or goal", opt: { a: "arrange", b: "arrive", c: "arise", d: "arid" }, ans: "b" },
+        { id: 6, q: "to love and respect someone deeply", opt: { a: "above", b: "average", c: "standard", d: "adore" }, ans: "d" },
+        { id: 7, q: "a place where animals are killed for food", opt: { a: "lighthouse", b: "farmhouse", c: "slaughterhouse", d: "green house" }, ans: "c" },
+        { id: 8, q: "to frighten, hurt, or threaten a smaller or weaker person", opt: { a: "bully", b: "bulletin", c: "bulldozer", d: "bullet" }, ans: "a" },
+        { id: 9, q: "Kind: generous: mild", opt: { a: "general", b: "greedy", c: "greatly", d: "gentle" }, ans: "d" },
+        { id: 10, q: "a person who owns a shop or other business that is involved with buying and selling", opt: { a: "market", b: "shop", c: "merchant", d: "vending machine" }, ans: "c" },
+        { id: 11, q: "a round thing that turns in circles and allows cars, bicycles, and so on to move easily over the ground", opt: { a: "wheel", b: "well", c: "weed", d: "what" }, ans: "a" },
+        { id: 12, q: "a heavy farm tool pulled by a tractor or animal, used to open the ground for planting", opt: { a: "plow", b: "blow", c: "pillow", d: "claw" }, ans: "a" },
+        { id: 13, q: "a vehicle with four wheels that is used to carry large or heavy loads", opt: { a: "wedge", b: "wage", c: "wagon", d: "cannon" }, ans: "c" },
+        { id: 14, q: "the small hard seeds of plants such as wheat or rice", opt: { a: "brain", b: "main", c: "train", d: "grain" }, ans: "d" },
+        { id: 15, q: "a wide area of open land", opt: { a: "mold", b: "fail", c: "soil", d: "field" }, ans: "d" },
+        { id: 16, q: "extremely tired, having used up all or nearly all of one's energy", opt: { a: "extended", b: "exhausted", c: "expected", d: "expanded" }, ans: "b" },
+        { id: 17, q: "to cause someone to be angry or upset", opt: { a: "annoy", b: "noise", c: "annalist", d: "anniversary" }, ans: "a" },
+        { id: 18, q: "in a way that is planned or intended; not by accident", opt: { a: "persist in", b: "by a pupil", c: "in a pearl", d: "on purpose" }, ans: "d" },
+        { id: 19, q: "to value with great love and care", opt: { a: "cheat", b: "chest", c: "cherish", d: "chair" }, ans: "c" },
+        { id: 20, q: "an amount of something that is carried", opt: { a: "lord", b: "loan", r: "load", d: "log" }, ans: "c" },
+        { id: 21, q: "with persistent and careful effort to achieve a goal", opt: { a: "diligent", b: "delight", c: "deliver", d: "dell" }, ans: "a" },
+        { id: 22, q: "to make someone feel less pain or worry", opt: { a: "confuse", b: "confess", c: "complete", d: "comfort" }, ans: "d" },
+        { id: 23, q: "of great worth or value", opt: { a: "practice", b: "precious", r: "particle", d: "pretend" }, ans: "b" },
+        { id: 24, q: "an expression of praise or admiration", opt: { a: "compliment", b: "complex", c: "compete", d: "complete" }, ans: "a" },
+        { id: 25, q: "having a thin edge or a fine point, especially for cutting or piercing; not blunt", opt: { a: "circular", b: "shock", c: "short", d: "sharp" }, ans: "d" },
+        { id: 26, q: "to express pleasure and kind feelings when someone arrives or joins you", opt: { a: "welcome", b: "well-being", c: "welfare", d: "well-known" }, ans: "a" },
+        { id: 27, q: "(especially an animal's tail) to cause to move repeatedly up and down or from side to side", opt: { a: "way", b: "wait", c: "wake", d: "wag" }, ans: "d" },
+        { id: 28, q: "wild and dangerous", opt: { a: "fire", b: "field", c: "fearless", d: "fierce" }, ans: "d" },
+        { id: 29, q: "a structure that goes over something such as a river or road so that people can travel from one side to the other", opt: { a: "bring", b: "bridge", c: "bride", d: "brother" }, ans: "b" },
+        { id: 30, q: "to know from earlier experience", opt: { a: "recommend", b: "receive", c: "recognize", d: "record" }, ans: "c" },
+        { id: 31, q: "kindness", opt: { a: "worry", b: "worship", c: "warming", d: "warmth" }, ans: "d" },
+        { id: 32, q: "to be no longer seen", opt: { a: "fierce", b: "discipline", c: "disappear", d: "dislike" }, ans: "c" },
+        { id: 33, q: "concerned only about yourself and not about others", opt: { a: "sell", b: "selfish", c: "seldom", d: "select" }, ans: "b" },
+        { id: 34, q: "an image seen in a mirror or a shiny surface", opt: { a: "reflection", b: "restart", c: "replay", d: "record" }, ans: "a" },
+        { id: 35, q: "a cause or an explanation for an event", opt: { a: "result", b: "region", c: "reason", d: "reach" }, ans: "c" },
+        { id: 36, q: "to pull along with effort", opt: { a: "frog", b: "flag", c: "brag", d: "drag" }, ans: "d" },
+        { id: 37, q: "an adult male of cattle and some other animals", opt: { a: "doll", b: "full", c: "fall", d: "bull" }, ans: "d" },
+        { id: 38, q: "to keep from hurting or killing", opt: { a: "spare", b: "repair", c: "pair", d: "spend" }, ans: "a" },
+        { id: 39, q: "a person in your family who lived a long time before you were born", opt: { a: "mother", b: "ancestor", c: "father", d: "grandmother" }, ans: "b" },
+        { id: 40, q: "the importance or worth of something for someone", opt: { a: "valve", b: "version", c: "value", d: "vaccine" }, ans: "c" },
+        { id: 41, q: "(of liquid or gas) to move or pour out in a continuous flow", opt: { a: "mostly", b: "strain", c: "shortly", d: "stream" }, ans: "d" },
+        { id: 42, q: "the gift of something to a god as an act of worship", opt: { a: "sacrifice", b: "sake", c: "nod", d: "dew" }, ans: "a" },
+        { id: 43, q: "to suddenly begin doing or producing something", opt: { a: "bite", b: "burst", c: "bend", d: "beat" }, ans: "b" },
+        { id: 44, q: "to present a prayer or sacrifice to a god", opt: { a: "effect", b: "afford", c: "effort", d: "offer" }, ans: "d" },
+        { id: 45, q: "a young of the domestic cow", opt: { a: "calf", b: "cape", c: "half", d: "care" }, ans: "a" }
+    ];
+
+    let activeQuestions = [];
+    let userAnswers = {}; // 사용자가 고른 답 저장
+    let currentIndex = 0;
+    let answered = false;
+
+    function initApp() {
+        activeQuestions = JSON.parse(JSON.stringify(quizDatabase));
+        userAnswers = {};
+        currentIndex = 0;
+        document.getElementById("quiz-screen").style.display = "flex";
+        document.getElementById("report-screen").style.display = "none";
+        renderQuiz();
+    }
+
+    function shuffleCurrentList() {
+        if (activeQuestions.length <= 1) return;
+        for (let i = activeQuestions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [activeQuestions[i], activeQuestions[j]] = [activeQuestions[j], activeQuestions[i]];
+        }
+        userAnswers = {};
+        currentIndex = 0;
+        renderQuiz();
+    }
+
+    function renderQuiz() {
+        if (activeQuestions.length === 0) return;
+
+        answered = false;
+        const currentItem = activeQuestions[currentIndex];
+        
+        document.getElementById("progress-indicator").innerText = `${currentIndex + 1} / ${activeQuestions.length}`;
+        document.getElementById("quiz-question").innerText = `${currentItem.id}. ${currentItem.q}`;
+
+        const optionsBox = document.getElementById("options-box");
+        optionsBox.innerHTML = "";
+
+        ["a", "b", "c", "d"].forEach(key => {
+            const optionText = currentItem.opt[key];
+            if (!optionText) return;
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerHTML = `<b style="margin-right:8px; text-transform:uppercase;">${key})</b> ${optionText}`;
+            
+            // 이미 이전에 답을 골랐던 문제라면 상태 유지
+            if (userAnswers[currentItem.id]) {
+                btn.disabled = true;
+                if (key === currentItem.ans) btn.classList.add("correct");
+                else if (key === userAnswers[currentItem.id]) btn.classList.add("wrong");
+            } else {
+                btn.onclick = () => checkAnswer(btn, key);
+            }
+            optionsBox.appendChild(btn);
+        });
+
+        document.getElementById("btn-prev").disabled = currentIndex === 0;
+        document.getElementById("btn-next").disabled = currentIndex === activeQuestions.length - 1;
+    }
+
+    function checkAnswer(selectedBtn, selectedKey) {
+        if (answered) return;
+        answered = true;
+
+        const currentItem = activeQuestions[currentIndex];
+        userAnswers[currentItem.id] = selectedKey; // 사용자의 마킹 기록
+        const correctKey = currentItem.ans;
+        const allButtons = document.querySelectorAll(".option-btn");
+        
+        allButtons.forEach((btn, index) => {
+            const btnKey = ["a", "b", "c", "d"][index];
+            btn.disabled = true;
+            if (btnKey === correctKey) btn.classList.add("correct");
+        });
+
+        if (selectedKey !== correctKey) {
+            selectedBtn.classList.add("wrong");
+        }
+
+        // 0.3초(300ms) 후 다음 문제로 자동 이동 또는 결과창 출력
+        setTimeout(() => {
+            if (currentIndex < activeQuestions.length - 1) {
+                currentIndex++;
+                renderQuiz();
+            } else {
+                showReport();
+            }
+        }, 300);
+    }
+
+    function showReport() {
+        document.getElementById("quiz-screen").style.display = "none";
+        document.getElementById("report-screen").style.display = "flex";
+
+        let correctCount = 0;
+        const gridBox = document.getElementById("report-grid-box");
+        gridBox.innerHTML = "";
+
+        // 원래 시험지 번호(1~45) 순서대로 리포트 생성
+        quizDatabase.forEach(item => {
+            const userAns = userAnswers[item.id];
+            const isCorrect = userAns === item.ans;
+            if (isCorrect) correctCount++;
+
+            const statusItem = document.createElement("div");
+            statusItem.className = `report-item ${isCorrect ? 'pass' : 'fail'}`;
+            statusItem.innerHTML = `<div>Q.${item.id}</div><div style="font-size:10px;">${isCorrect ? '정답' : '오답'}</div>`;
+            gridBox.appendChild(statusItem);
+        });
+
+        document.getElementById("final-score").innerText = `${correctCount} / ${quizDatabase.length}`;
+    }
+
+    function handleNext() {
+        if (currentIndex < activeQuestions.length - 1) {
+            currentIndex++;
+            renderQuiz();
+        }
+    }
+
+    function handlePrev() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderQuiz();
+        }
+    }
+
+    function restartQuiz() {
+        initApp();
+    }
+
+    window.onload = function() {
+        initApp();
+    }
+</script>
+
+</body>
+</html>
